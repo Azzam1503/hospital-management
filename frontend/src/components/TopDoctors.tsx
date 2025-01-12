@@ -13,7 +13,7 @@ const TopDoctors = () => {
         Simply Browse through our extensive list of trusted doctors
       </p>
       <div className="w-full grid grid-cols-auto gap-4 pt-5 gap-y-6 px-3 sm:px-0">
-        {doctors.slice(0, 10).map((item, ind) => (
+        {doctors.slice(0, 10).map((item: any, ind: number) => (
           <div
             onClick={() => navigate(`/appointment/${item._id}`)}
             className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500"
@@ -32,7 +32,10 @@ const TopDoctors = () => {
         ))}
       </div>
       <button
-        onClick={() => navigate("/doctors")}
+        onClick={() => {
+          navigate("/doctors");
+          scrollTo(0, 0);
+        }}
         className="bg-blue text-gray px-13 py-3 rounded-full mt-10"
       >
         more
