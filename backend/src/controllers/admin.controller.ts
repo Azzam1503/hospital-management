@@ -72,6 +72,8 @@ const allDoctors = async (req: Request, res: Response): Promise<any> => {
     } catch (error) {
         console.log("Error in all doctors", error);
     }
-}
+};
+
+
 
 export {addDoctor, loginAdmin, allDoctors};
