@@ -37,7 +37,8 @@ const addDoctor = async (req: Request, res: Response): Promise<any> => {
             name, email, image: imageUrl, password: hashedPassword, address: JSON.parse(address), degree, fee, about, experience, speciality, date: Date.now(), available
         });
 
-        return res.json(newDoctor);
+        return res.status(200).json({
+           success:true, newDoctor});
 
     } catch (error) {
         console.log(error);
@@ -50,17 +51,27 @@ const loginAdmin = async (req: Request, res: Response) : Promise<any> => {
     try {
         console.log("Admin login route hit");
         const {email, password} = req.body;
-
+        console.log(req.body);
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
             const token = jwt.sign(email + password, process.env.ADMIN_SECRET!);
             return res.json({success: true, token});
         }else{
-            res.json({success: false, messgae: "Invalid Credentials"});
+            console.log("I am here");
+            res.status(401).json({success: false, message: "Invalid Credentials"});
         }
     } catch (error) {
         console.log("Error in admin login", error);
-        return res.json({success:false, messgae: "Error while logging in admin"});
+        return res.json({success:false, message: "Error while logging in admin"});
     }
 }
 
-export {addDoctor, loginAdmin};
+const allDoctors = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const doctors = await Doctor.find({}).select("-password");
+        return res.status(200).json({success: true, doctors})
+    } catch (error) {
+        console.log("Error in all doctors", error);
+    }
+}
+
+export {addDoctor, loginAdmin, allDoctors};
