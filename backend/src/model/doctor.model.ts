@@ -54,6 +54,11 @@ const doctorSchema = new mongoose.Schema({
         type: Object,
         required: true,
     },
+    about:{
+        type: String, 
+        required: true
+    },
+    
     date: {
         type: Number,
         required: true,

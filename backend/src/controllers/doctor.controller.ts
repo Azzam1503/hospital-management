@@ -16,6 +16,16 @@ const chageAvailability = async (req: Request, res: Response): Promise<any> => {
         console.log("error in availability chage", error);
         return res.status(402).json({success: false, message: "Error while updating availability"});
     }
+};
+
+const doctorList = async (req: Request, res: Response): Promise<any> =>{
+    try {
+        const doctors = await Doctor.find({}).select(["-password", "-email", "-createdAt"]);
+        return res.json({success: true, doctors});
+    } catch (error) {
+        console.log("erron in doctor list", error);
+        res.status(400).json({success: false, error});
+    }
 }
 
-export {chageAvailability};
+export {chageAvailability, doctorList};
