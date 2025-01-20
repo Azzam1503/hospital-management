@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import User from "../model/user.model";
 import validator from "validator";
 import jwt from "jsonwebtoken";
+import { CustomRequest } from '../middleware/authUser';
+import { uploadOnCloudinary } from '../config/cloudinary';
 
 const registerUser = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -40,6 +42,7 @@ const registerUser = async (req: Request, res: Response): Promise<any> => {
 
 const loginUser = async (req: Request, res: Response): Promise<any> => {
     try {
+        console.log(req.body);
         const {email, password} = req.body;
 
         const user = await User.findOne({email: email});
@@ -60,6 +63,57 @@ const loginUser = async (req: Request, res: Response): Promise<any> => {
         console.log(error);
         return res.status(401).json({success: false, message: "Error while login"});
     }
+
 }
 
-export {registerUser, loginUser};
+const getProfile = async (req: CustomRequest, res: Response): Promise<any> =>{
+    try {
+        const _id = req.userId;
+        
+        const user = await User.findById(_id).select(["-password", "-createdAt", "-updatedAt", "-__v"]);
+
+        if(!user) return res.status(401).json({success:false, message: "No user found"});
+        
+        return res.status(200).json({success:true, user});
+    } catch (error) {
+        console.log("error in getProfile", error);
+        return res.status(401).json({success:false, message: "No user found"});
+    }
+};
+
+const updateProfile = async (req:CustomRequest, res: Response): Promise<any> =>{
+    try {
+        // console.log(req.file);
+        console.log(req.body);
+        let imageFile = req.file;
+        const {email, name, address, gender, dob, phone} = req.body;
+        if(!name || !email  || !address ||  !gender || !dob || !phone) return res.status(402).json({success:false, message: "Missing details"});
+        const _id = req.userId;
+
+        const user = await User.findById(_id);
+
+        if(!user) return res.status(401).json({success:false, message: "No user found"});
+        let image = undefined;
+        if(imageFile === undefined){
+            image = user.image;
+        }else{
+            let ifUploaded = await uploadOnCloudinary(imageFile.path);
+            if(ifUploaded !== null){
+                image = ifUploaded.secure_url; 
+
+            }
+        };
+
+        await User.findByIdAndUpdate(_id,{
+            email, name, address, gender, dob, phone, image
+        });
+
+        return res.status(200).json({success: true, message: "User updated successfully"});
+
+    } catch (error) {
+        console.log("error in updateProfile", error);
+        return res.status(401).json({success:false, message: "Error while updating user"});
+    }
+};
+
+export {registerUser, loginUser, getProfile, updateProfile};
