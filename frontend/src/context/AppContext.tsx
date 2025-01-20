@@ -5,8 +5,8 @@ import { toast } from "react-toastify";
 export const AppContext = createContext<any>(undefined);
 
 const AppConextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [doctors, setDoctors] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -25,11 +25,15 @@ const AppConextProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    setToken(localStorage.getItem("user_token"));
     getAllDoctors();
   }, []);
 
   const value = {
     doctors,
+    backendUrl,
+    token,
+    setToken,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

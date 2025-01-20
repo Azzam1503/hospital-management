@@ -1,15 +1,55 @@
-import React, { FormEvent, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { AppContext } from "../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [state, setState] = useState("Sign up");
-
+  const { setToken, backendUrl, token } = useContext(AppContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const navigate = useNavigate();
 
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    try {
+      if (state === "Sign up") {
+        const res = await axios.post(`${backendUrl}/api/user/register`, {
+          email,
+          password,
+          name,
+        });
+        console.log(res.data);
+        if (res.data.success) {
+          toast.success("Registered Successfully");
+          setToken(res.data.user_token);
+          localStorage.setItem("user_token", res.data.user_token);
+        }
+      } else {
+        const res = await axios.post(`${backendUrl}/api/user/login`, {
+          email,
+          password,
+        });
+        console.log(res.data);
+        if (res.data.success) {
+          toast.success("Logged In Successfully");
+          setToken(res.data.user_token);
+          localStorage.setItem("user_token", res.data.user_token);
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+      console.log(error);
+    }
   };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token]);
 
   return (
     <form className="min-h-[80vh] flex items-center" onSubmit={onSubmitHandler}>
