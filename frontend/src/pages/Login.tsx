@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [state, setState] = useState("Sign up");
-  const { setToken, backendUrl, token } = useContext(AppContext);
+  const { setUserToken, backendUrl, userToken } = useContext(AppContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -24,7 +24,7 @@ const Login = () => {
         console.log(res.data);
         if (res.data.success) {
           toast.success("Registered Successfully");
-          setToken(res.data.user_token);
+          setUserToken(res.data.user_token);
           localStorage.setItem("user_token", res.data.user_token);
         }
       } else {
@@ -35,7 +35,7 @@ const Login = () => {
         console.log(res.data);
         if (res.data.success) {
           toast.success("Logged In Successfully");
-          setToken(res.data.user_token);
+          setUserToken(res.data.user_token);
           localStorage.setItem("user_token", res.data.user_token);
         }
       }
@@ -46,10 +46,10 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (token) {
+    if (userToken) {
       navigate("/");
     }
-  }, [token]);
+  }, [userToken]);
 
   return (
     <form className="min-h-[80vh] flex items-center" onSubmit={onSubmitHandler}>

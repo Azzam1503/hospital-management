@@ -6,7 +6,7 @@ import { AppContext } from "../context/AppContext";
 const Navbar = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
-  const { token, setToken } = useContext(AppContext);
+  const { userToken, setUserToken } = useContext(AppContext);
 
   return (
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400">
@@ -30,7 +30,7 @@ const Navbar = () => {
         </NavLink>
       </ul>
       <div className="flex item-center gap-4">
-        {token ? (
+        {userToken ? (
           <div className="flex item-center gap-2 cursor-pointer group relative">
             <img className="w-8 rounded-full" src={assets.profile_pic} alt="" />
             <img className="w-2.5" src={assets.dropdown_icon} alt="" />
@@ -50,7 +50,7 @@ const Navbar = () => {
                 </p>
                 <p
                   onClick={() => {
-                    setToken("");
+                    setUserToken("");
                     localStorage.removeItem("user_token");
                   }}
                   className="hover:text-black cursor-pointer"

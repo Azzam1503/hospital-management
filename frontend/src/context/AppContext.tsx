@@ -6,7 +6,10 @@ export const AppContext = createContext<any>(undefined);
 
 const AppConextProvider = ({ children }: { children: React.ReactNode }) => {
   const [doctors, setDoctors] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [userToken, setUserToken] = useState(
+    localStorage.getItem("user_token")
+  );
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -24,18 +27,60 @@ const AppConextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const getUserProfileData = async () => {
+    try {
+      console.log("I am called");
+      const res = await axios.get(`${backendUrl}/api/user/get-profile`, {
+        headers: {
+          user_token: userToken,
+        },
+      });
+      console.log(res.data);
+      setUserData(res.data.user);
+    } catch (error) {
+      toast.error("Server Error");
+      console.log("error in the getProfileData", error);
+    }
+  };
+
   useEffect(() => {
-    setToken(localStorage.getItem("user_token"));
+    setUserToken(localStorage.getItem("user_token"));
     getAllDoctors();
   }, []);
+
+  useEffect(() => {
+    if (userToken) {
+      getUserProfileData();
+    } else {
+      setUserData(null);
+    }
+  }, [userToken]);
 
   const value = {
     doctors,
     backendUrl,
-    token,
-    setToken,
+    userToken,
+    setUserToken,
+    userData,
+    setUserData,
+    getUserProfileData,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 export default AppConextProvider;
+
+interface Address {
+  line1: string;
+  line2: string;
+}
+
+export interface UserData {
+  name: string;
+  email: string;
+  phone: string;
+  address: Address;
+  image: string;
+  gender: string;
+  dob: string;
+}
