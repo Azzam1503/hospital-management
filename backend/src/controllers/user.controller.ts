@@ -86,8 +86,8 @@ const updateProfile = async (req:CustomRequest, res: Response): Promise<any> =>{
         // console.log(req.file);
         console.log(req.body);
         let imageFile = req.file;
-        const {email, name, address, gender, dob, phone} = req.body;
-        if(!name || !email  || !address ||  !gender || !dob || !phone) return res.status(402).json({success:false, message: "Missing details"});
+        const {name, address, gender, dob, phone} = req.body;
+        if(!name || !address ||  !gender || !dob || !phone) return res.status(402).json({success:false, message: "Missing details"});
         const _id = req.userId;
 
         const user = await User.findById(_id);
@@ -105,7 +105,7 @@ const updateProfile = async (req:CustomRequest, res: Response): Promise<any> =>{
         };
 
         await User.findByIdAndUpdate(_id,{
-            email, name, address, gender, dob, phone, image
+            name, address: JSON.parse(address), gender, dob, phone, image
         });
 
         return res.status(200).json({success: true, message: "User updated successfully"});
