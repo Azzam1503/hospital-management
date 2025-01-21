@@ -14,10 +14,12 @@ const AppConextProvider = ({ children }: { children: React.ReactNode }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const getAllDoctors = async () => {
+    console.log("Get All doctors is called");
     try {
       const res = await axios.get(`${backendUrl}/api/doctor/list`);
       if (res.status === 200) {
         setDoctors(res.data.doctors);
+        console.log(res.data.doctors);
       } else {
         throw new Error("Error while fetching doctors");
       }
@@ -64,6 +66,7 @@ const AppConextProvider = ({ children }: { children: React.ReactNode }) => {
     userData,
     setUserData,
     getUserProfileData,
+    getAllDoctors,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
