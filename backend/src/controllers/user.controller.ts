@@ -5,6 +5,8 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import { CustomRequest } from '../middleware/authUser';
 import { uploadOnCloudinary } from '../config/cloudinary';
+import Doctor from '../model/doctor.model';
+import Appointment from '../model/appointment.model';
 
 const registerUser = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -116,4 +118,52 @@ const updateProfile = async (req:CustomRequest, res: Response): Promise<any> =>{
     }
 };
 
-export {registerUser, loginUser, getProfile, updateProfile};
+const bookAppointment = async (req: CustomRequest, res: Response): Promise<any> => {
+    try {
+        const {docId, slotDate, slotTime} = req.body;
+        const userId = req.userId;
+        const doctorDetails = await Doctor.findById(docId).select("-password");
+
+        if(!doctorDetails.available){
+            return res.status(400).json({success:false, message: "Doctor not Available"});
+        };
+
+        let slots_booked = doctorDetails.slots_booked;
+
+        if(slots_booked[slotDate]){
+            if(slots_booked[slotDate].includes(slotTime)){
+                return res.status(400).json({success:false, message: "Slot not Available"});
+            }else{
+                slots_booked[slotDate].push(slotTime);
+            }
+        }else{
+            slots_booked[slotDate] =[];
+            slots_booked[slotDate].push(slotTime);
+        };
+
+
+        const userData = await User.findById(userId).select("-password");
+
+        delete doctorDetails.slots_booked;
+
+        const appointment = await Appointment.create({
+            userId,
+            docId,
+            userData,
+            docData: doctorDetails,
+            amount: doctorDetails.fee,
+            slotTime,
+            slotDate,
+            date: Date.now()
+        });
+
+        console.log(appointment);
+        await Doctor.findByIdAndUpdate(docId, {slots_booked});
+        return res.status(200).json({scuess: true, message: "Appointment booked successfully"});
+    } catch (error) {
+        console.log("error in book appointment", error);
+        res.status(501).json({success:false, error})
+    }
+}
+
+export {registerUser, loginUser, getProfile, updateProfile, bookAppointment};
