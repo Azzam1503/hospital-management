@@ -1,17 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { AdminContext } from "../../context/AdminContext";
 
 const DoctorsList = () => {
-  const { getAllDoctors, token, doctors } = useContext(AdminContext);
+  const { getAllDoctors, token, doctors, changeAvailability } =
+    useContext(AdminContext);
   useEffect(() => {
     if (token) {
       getAllDoctors();
-      console.log(doctors);
     }
   }, [token]);
 
   return (
-    <div className="m-5 max-h-[90vh] overflow-scroll">
+    <div className="m-5 max-h-[90vh] overflow-y-scroll">
       <h1 className="text-lg font-medium">All Doctors</h1>
       <div className="w-full flex flex-wrap gap-4 pt-5 gap-y-6">
         {doctors &&
@@ -31,8 +31,12 @@ const DoctorsList = () => {
                 </p>
                 <p className="text-zinc-600 text-sm">{doctor.speciality}</p>
               </div>
-              <div className="mt-2 flex items-center gap-1 text-sm">
-                <input type="checkbox" checked={doctor.available} />
+              <div className="mt-2 px-4 py-2 flex items-center gap-1 text-sm">
+                <input
+                  onChange={() => changeAvailability(doctor._id)}
+                  type="checkbox"
+                  checked={doctor.available}
+                />
                 <p>Available</p>
               </div>
             </div>

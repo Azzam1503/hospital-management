@@ -52,7 +52,6 @@ const AddDoctor = () => {
       );
       console.log(res);
       if (res.status === 200) {
-        console.log("res is here");
         setDocImg(null);
         setName("");
         setEmail("");
