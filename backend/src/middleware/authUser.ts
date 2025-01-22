@@ -8,7 +8,7 @@ export interface CustomRequest extends Request{
 const authUser = async (req: CustomRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
         const user_token : any = req.headers.user_token;
-        console.log("user_token", user_token);
+        console.log("user_token-------", user_token);
         if(!user_token) return res.status(401).json({success: false, message: "No token found"});
         const decoded = jwt.verify(user_token, process.env.USER_SECRET!);
 

@@ -7,6 +7,7 @@ import { CustomRequest } from '../middleware/authUser';
 import { uploadOnCloudinary } from '../config/cloudinary';
 import Doctor from '../model/doctor.model';
 import Appointment from '../model/appointment.model';
+import { StringDecoder } from 'string_decoder';
 
 const registerUser = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -164,6 +165,58 @@ const bookAppointment = async (req: CustomRequest, res: Response): Promise<any> 
         console.log("error in book appointment", error);
         res.status(501).json({success:false, error})
     }
-}
+};
 
-export {registerUser, loginUser, getProfile, updateProfile, bookAppointment};
+const listAppointment = async (req: CustomRequest, res: Response): Promise<any> => {
+    try {
+        const userId = req.userId;
+        console.log("route hit");
+        console.log(req.userId);
+        const appointments = await Appointment.find({userId});
+
+        return res.status(200).json({sccuess: true, appointments});
+    } catch (error) {
+        console.log("Error in the list appointment", listAppointment);
+        return res.status(401).json({success:false, message: "Error while fetching appointments"});
+    }
+};
+
+const cancelAppointment = async (req:CustomRequest, res: Response): Promise<any> => {
+    try {
+        const {appointmentId} = req.body;
+        const userId = req.userId;
+        console.log(appointmentId, "----", userId);
+        const appointmentData = await Appointment.findById(appointmentId);
+        console.log(appointmentData);
+        if(!appointmentData){
+            return res.status(401).json({success:false, message: "No appointment found"});
+        }
+
+        if(appointmentData.userId !== userId) return res.status(401).json({success:false, message: "Error while cancelling appointment"});
+
+        await Appointment.findByIdAndUpdate(appointmentId, {
+            cancelled: true
+        })
+        const {docId, slotDate, slotTime} = appointmentData;
+        
+        const doctorData = await Doctor.findById(docId);
+
+        let slots_booked = doctorData.slots_booked;
+
+        slots_booked[slotDate] = slots_booked[slotDate].filter((e: string) => e !== slotTime);
+        
+        doctorData.slots_booked = slots_booked;
+
+        await Doctor.findByIdAndUpdate(docId, {
+            slots_booked
+        });
+
+        return res.status(200).json({success: true, message: "Appointment cancelled successfully"});
+
+    } catch (error) {
+        console.log("Error in the cancel appointment", error);
+        return res.status(500).json({success:false, message: "Error while cancelling appointment"});
+    }
+};
+
+export {registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment};
