@@ -205,7 +205,6 @@ const cancelAppointment = async (req:CustomRequest, res: Response): Promise<any>
 
         slots_booked[slotDate] = slots_booked[slotDate].filter((e: string) => e !== slotTime);
         
-        doctorData.slots_booked = slots_booked;
 
         await Doctor.findByIdAndUpdate(docId, {
             slots_booked

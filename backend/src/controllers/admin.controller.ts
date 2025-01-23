@@ -1,9 +1,12 @@
+import { CustomRequest } from './../middleware/authUser';
 import Doctor from "../model/doctor.model";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { uploadOnCloudinary } from "../config/cloudinary";
 import jwt from "jsonwebtoken";
+import Appointment from '../model/appointment.model';
+import User from '../model/user.model';
 
 const addDoctor = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -71,9 +74,66 @@ const allDoctors = async (req: Request, res: Response): Promise<any> => {
         return res.status(200).json({success: true, doctors})
     } catch (error) {
         console.log("Error in all doctors", error);
+        return res.status(500).json({success:false, message: "Error while getting doctors"});
+    }
+};
+
+const appointmentsAdmin = async (req: CustomRequest, res : Response): Promise<any> =>{
+    try {
+        const appointments = await Appointment.find({});
+        res.status(200).json({success:true, appointments});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success:false, message: "Error while getting appointments"});
+    }
+};
+
+const cancelAppointment = async (req: Request, res: Response) : Promise<any> => {
+    try {
+        const {id} = req.body;
+
+        const appointmentData = await Appointment.findById(id);
+
+        await Appointment.findByIdAndUpdate(id,{
+            cancelled: true
+        });
+
+        const {docId, slotDate, slotTime} = appointmentData;
+
+        const doctorData = await Doctor.findById(docId);
+
+        let slots_booked = doctorData.slots_booked;
+
+        slots_booked[slotDate] = slots_booked[slotDate].filter((e: string) => e !== slotTime);
+
+        await Doctor.findByIdAndUpdate(docId, {slots_booked});
+        return res.status(200).json({success: true, message: "Appointment cancelled successfully"});
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({success: false, message: "Error while cancelling appointment"});
     }
 };
 
 
+const adminDashboardData = async (req:Request, res: Response): Promise<any> => {
+    try {
+        const doctors = await Doctor.find({});
+        const users = await User.find({});
+        const appointments = await Appointment.find({});
 
-export {addDoctor, loginAdmin, allDoctors};
+        const data = {
+            doctors: doctors.length,
+            appointments: appointments.length,
+            patients: users.length,
+            latestAppointmets: appointments.reverse().slice(0,10)
+        };
+
+        return res.status(200).json({success: true, data});
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success:false, message: "Error while getting details"})
+    }
+};
+
+export {addDoctor, loginAdmin, allDoctors, appointmentsAdmin, cancelAppointment, adminDashboardData};
