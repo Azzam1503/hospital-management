@@ -7,6 +7,7 @@ export const AdminContext = createContext<any>(undefined);
 const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState(localStorage.getItem("Admin token"));
   const [doctors, setDoctors] = useState(null);
+  const [appointments, setAppointments] = useState(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -46,6 +47,20 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const getAllAppointments = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/admin/get-appointments`, {
+        headers: {
+          token,
+        },
+      });
+      console.log(res.data);
+      setAppointments(res.data.appointments);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const value = {
     token,
     setToken,
@@ -53,6 +68,8 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
     doctors,
     getAllDoctors,
     changeAvailability,
+    appointments,
+    getAllAppointments,
   };
   return (
     <AdminContext.Provider value={value}>{children}</AdminContext.Provider>
