@@ -7,7 +7,7 @@ import { CustomRequest } from '../middleware/authUser';
 import { uploadOnCloudinary } from '../config/cloudinary';
 import Doctor from '../model/doctor.model';
 import Appointment from '../model/appointment.model';
-import { StringDecoder } from 'string_decoder';
+import razorpay from 'razorpay';
 
 const registerUser = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -219,4 +219,58 @@ const cancelAppointment = async (req:CustomRequest, res: Response): Promise<any>
     }
 };
 
-export {registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment};
+const razorpayInstance = new razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || "",
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+const paymentRazorpay = async (req: CustomRequest, res: Response): Promise<any> => {
+    try {
+        const {appointmentId} = req.body;
+
+        const appointmentdata = await Appointment.findById(appointmentId);
+
+        if(!appointmentdata || appointmentdata.cancelled) return res.status(500).json({success:false, message: "Appointment cancelled or not found"});
+
+        const options = {
+            amount: appointmentdata.amount * 100,
+            currency: "INR",
+            receipt: appointmentId
+        };
+
+
+        //order creation
+
+        const order = await razorpayInstance.orders.create(options);
+
+        return res.status(200).json({success: true, order});
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success: false, message: "Error while creating order"});
+        
+    }
+};
+
+
+const verifyRazorpay = async (req: CustomRequest, res: Response): Promise<any> => {
+    try {
+        const {details} = req.body;
+        console.log(details);
+        const orderInfo = await razorpayInstance.orders.fetch(details.razorpay_order_id);
+
+        if(orderInfo.status === "paid"){
+            await Appointment.findByIdAndUpdate(orderInfo.receipt, {payment: true});
+            return res.status(200).json({success: true, message: "Payment Successful"});
+        }
+        
+        return res.status(500).json({success: false, message: "Payment not done"});
+
+
+        console.log(orderInfo);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export {registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, paymentRazorpay, verifyRazorpay};
