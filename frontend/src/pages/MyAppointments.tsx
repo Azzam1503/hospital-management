@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const MyAppointments = () => {
-  const { backendUrl, userToken } = useContext(AppContext);
+  const { backendUrl, userToken, getAllDoctors } = useContext(AppContext);
   const navigate = useNavigate();
   const [appoinments, setAppointments] = useState([]);
 
@@ -68,7 +68,64 @@ const MyAppointments = () => {
       );
       toast.success("Appointment cancelled");
       getUserAppointments();
+      getAllDoctors();
       console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const finalPayment = async (order: any) => {
+    const options = {
+      key: import.meta.env.RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Appointment Payment",
+      description: "Appointment Payment",
+      order_id: order.id,
+      receipt: order.receipt,
+      handler: async (response: any) => {
+        console.log(response);
+        try {
+          const { data } = await axios.post(
+            `${backendUrl}/api/user/verify-razorpay`,
+            { details: response },
+            {
+              headers: {
+                user_token: userToken,
+              },
+            }
+          );
+
+          toast.success(data.message);
+          getUserAppointments();
+        } catch (error: any) {
+          toast.error(error.response.data.message);
+          console.log(error);
+        }
+      },
+    };
+
+    // @ts-ignore
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  const appointmentRazorpay = async (appointmentId: string) => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/user/payment-razorpay`,
+        { appointmentId },
+        {
+          headers: {
+            user_token: userToken,
+          },
+        }
+      );
+
+      finalPayment(data.order);
+
+      console.log(data);
     } catch (error) {
       console.log(error);
     }
@@ -114,8 +171,18 @@ const MyAppointments = () => {
               </div>
               <div></div>
               <div className="flex flex-col gap-2 justify-end">
-                {!item.cancelled && (
-                  <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border hover:bg-primary hover:text-white transition-all duration-300">
+                {!item.cancelled && item.payment && (
+                  <button className="sm:min-w-48 py-2 border rounded text-stone-500 bg-indigo-50">
+                    Paid
+                  </button>
+                )}
+                {!item.cancelled && !item.payment && (
+                  <button
+                    onClick={() => {
+                      appointmentRazorpay(item._id);
+                    }}
+                    className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border hover:bg-primary hover:text-white transition-all duration-300"
+                  >
                     Pay Online
                   </button>
                 )}
