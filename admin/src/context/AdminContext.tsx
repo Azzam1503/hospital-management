@@ -8,6 +8,7 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState(localStorage.getItem("Admin token"));
   const [doctors, setDoctors] = useState(null);
   const [appointments, setAppointments] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -61,6 +62,41 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const cancelAppointment = async (id: string) => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/admin/cancel-appointment`,
+        { id },
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+
+      toast.success(res.data.message);
+      getAllAppointments();
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+      console.log(error);
+    }
+  };
+
+  const getDashboardData = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/admin/dashboard-data`, {
+        headers: {
+          token,
+        },
+      });
+
+      console.log(res.data);
+      setDashboardData(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const value = {
     token,
     setToken,
@@ -70,6 +106,9 @@ const AdminContextProvider = ({ children }: { children: React.ReactNode }) => {
     changeAvailability,
     appointments,
     getAllAppointments,
+    cancelAppointment,
+    dashboardData,
+    getDashboardData,
   };
   return (
     <AdminContext.Provider value={value}>{children}</AdminContext.Provider>

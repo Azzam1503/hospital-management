@@ -7,36 +7,10 @@ import { assets } from "../../assets/assets_admin/assets";
 import axios from "axios";
 
 const AllApointments = () => {
-  const { token, getAllAppointments, appointments, backendUrl } =
+  const { token, getAllAppointments, appointments, cancelAppointment } =
     useContext(AdminContext);
-  const { calculateAge } = useContext(AppContext);
+  const { calculateAge, slotDateFormat } = useContext(AppContext);
   const navigate = useNavigate();
-
-  const months = [
-    "January",
-    "Feburary",
-    "March",
-    "Apr",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const slotDateFormat = (slotDate: string): string => {
-    const dateArray = slotDate.split("_");
-    return (
-      dateArray[0] +
-      " " +
-      months[parseInt(dateArray[1]) - 1] +
-      " " +
-      dateArray[2]
-    );
-  };
 
   useEffect(() => {
     if (!token) {
@@ -47,26 +21,6 @@ const AllApointments = () => {
 
     getAllAppointments();
   }, [token]);
-
-  const cancelAppointment = async (id: string) => {
-    try {
-      const res = await axios.post(
-        `${backendUrl}/api/admin/cancel-appointment`,
-        { id },
-        {
-          headers: {
-            token,
-          },
-        }
-      );
-
-      toast.success(res.data.message);
-      getAllAppointments();
-    } catch (error: any) {
-      toast.error(error.response.data.message);
-      console.log(error);
-    }
-  };
 
   return (
     <div className="w-full max-w-6xl m-5">
