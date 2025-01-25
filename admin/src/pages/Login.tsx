@@ -4,6 +4,7 @@ import { AdminContext } from "../context/AdminContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { DoctorContext } from "../context/DoctorContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [state, setState] = useState("Admin");
@@ -11,6 +12,8 @@ const Login = () => {
   const { setDoctorToken } = useContext(DoctorContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,7 +35,12 @@ const Login = () => {
         }
 
         localStorage.setItem(`${state} token`, res.data.token);
-        console.log(res.data.token);
+
+        if (state === "Admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/doctor-dashboard");
+        }
       }
     } catch (error: any) {
       toast.error(error.response.data.message);

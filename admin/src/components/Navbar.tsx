@@ -2,13 +2,18 @@ import React, { useContext } from "react";
 import { assets } from "../assets/assets_admin/assets";
 import { AdminContext } from "../context/AdminContext";
 import { useNavigate } from "react-router-dom";
+import { DoctorContext } from "../context/DoctorContext";
 
 const Navbar = () => {
   const { token, setToken } = useContext(AdminContext);
+  const { setDoctorToken } = useContext(DoctorContext);
+
   const navigate = useNavigate();
   const handleLogout = async () => {
     setToken("");
     localStorage.removeItem("Admin token");
+    setDoctorToken("");
+    localStorage.removeItem("Doctor token");
     navigate("/");
   };
   return (

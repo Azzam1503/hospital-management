@@ -7,7 +7,8 @@ export const DoctorContext = createContext<any>(undefined);
 const DoctorContextProvider = ({ children }: { children: React.ReactNode }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [appointments, setAppointments] = useState([]);
-  const [dashboardData, setDashboardData] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   const [doctorToken, setDoctorToken] = useState(
     localStorage.getItem("Doctor token") || null
@@ -78,6 +79,22 @@ const DoctorContextProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(error);
     }
   };
+
+  const getDoctorProfile = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/doctor/profile`, {
+        headers: {
+          token: doctorToken,
+        },
+      });
+
+      console.log(res);
+      setProfile(res.data.doctor);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const value = {
     backendUrl,
     doctorToken,
@@ -88,6 +105,9 @@ const DoctorContextProvider = ({ children }: { children: React.ReactNode }) => {
     cancelAppointment,
     dashboardData,
     getDashboardData,
+    getDoctorProfile,
+    profile,
+    setProfile,
   };
   return (
     <DoctorContext.Provider value={value}>{children}</DoctorContext.Provider>
