@@ -125,7 +125,7 @@ const adminDashboardData = async (req:Request, res: Response): Promise<any> => {
             doctors: doctors.length,
             appointments: appointments.length,
             patients: users.length,
-            latestAppointmets: appointments.reverse().slice(0,10)
+            latestAppointments: appointments.reverse().slice(0,10)
         };
 
         return res.status(200).json({success: true, data});
