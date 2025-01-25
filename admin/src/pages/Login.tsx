@@ -3,24 +3,34 @@ import { assets } from "../assets/assets_admin/assets";
 import { AdminContext } from "../context/AdminContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { DoctorContext } from "../context/DoctorContext";
 
 const Login = () => {
   const [state, setState] = useState("Admin");
   const { setToken, backendUrl } = useContext(AdminContext);
+  const { setDoctorToken } = useContext(DoctorContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${backendUrl}/api/${state}/login`, {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        `${backendUrl}/api/${state.toLowerCase()}/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       if (res.data.success) {
-        console.log(res.data.token);
-        setToken(res.data.token);
+        console.log("token", res.data.token);
+        if (state === "Admin") {
+          setToken(res.data.token);
+        } else {
+          setDoctorToken(res.data.token);
+        }
+
         localStorage.setItem(`${state} token`, res.data.token);
         console.log(res.data.token);
       }
