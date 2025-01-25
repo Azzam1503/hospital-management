@@ -119,7 +119,7 @@ const doctorDashboard = async (req: CustomDoctorRequest, res: Response) : Promis
         },[]);
 
         const dashboardData = {
-            earnings, patients, appointments: appointments.length,
+            earnings, patients: patients.length, appointments: appointments.length,
             latestAppointments: appointments.reverse().slice(0,5)
         };
 
@@ -128,6 +128,30 @@ const doctorDashboard = async (req: CustomDoctorRequest, res: Response) : Promis
         console.log("error in doctor dashboard data controller", error);
         return res.status(500).json({success:false, message: "Error while getting data"});
     }
+}; 
+
+const doctorProfile = async (req : CustomDoctorRequest, res: Response): Promise<any> => {
+    try {
+        const docId = req.docId;
+        const doctor = await Doctor.findById(docId).select(["-password", "-createdAt", "-updatedAt", "-__v"]);
+        return res.status(200).json({success: true, doctor});
+    } catch (error) {
+        console.log("error in doctor profile controller", error);
+        return res.status(500).json({success:false, message: "Error while getting data"});
+    }
+};
+
+const doctorProfileUpdate = async (req: CustomDoctorRequest, res: Response) : Promise<any> =>{
+    try {
+        const docId = req.docId;
+        const {fee, address, available, about} = req.body;
+
+        await Doctor.findByIdAndUpdate({fee, address, available, about});
+        return res.status(200).json({success: true, message: "Updated Successfully"}); 
+    } catch (error) {
+        console.log("error in doctor profile update controller", error);
+        return res.status(500).json({success:false, message: "Error while updating data"});
+    }
 }
 
-export {chageAvailability, doctorList, login, appointmentDoctor, appointmentCancel, appointmentComplete, doctorDashboard};
+export {chageAvailability, doctorList, login, appointmentDoctor, appointmentCancel, appointmentComplete, doctorDashboard, doctorProfile, doctorProfileUpdate};
