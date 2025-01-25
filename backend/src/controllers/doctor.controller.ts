@@ -56,10 +56,78 @@ const appointmentDoctor = async (req: CustomDoctorRequest, res: Response): Promi
     try {
         const docId = req.docId;
         const appointments = await Appointment.find({docId});
-        return res.json(appointments);
+        return res.status(200).json({success:true, appointments});
     } catch (error) {
         console.log(error);
     }
 }
 
-export {chageAvailability, doctorList, login, appointmentDoctor};
+const appointmentComplete = async (req: CustomDoctorRequest, res: Response): Promise<any> => {
+    try {
+        const {appointmentId} = req.body;
+        const docId = req.docId;
+
+        const appointment = await Appointment.findById(appointmentId);
+        if(!appointment) return res.status(500).json({success:false, message: "Appointment does not exist"});  
+        if(appointment.docId !== docId) return res.status(401).json({success:false, message: "Unauthorized"});  
+
+        if(appointment.isCompleted) return res.status(500).json({success:false, message: "Already Completed"});  
+
+        appointment.isCompleted = true;
+        await appointment.save();
+
+        return res.status(200).json({success:true, message: "Appointment Completed Successfully"})
+    } catch (error) {
+        return res.status(500).json({success:false, message: "Error while completing appointment"}); 
+    }
+};
+
+const appointmentCancel = async (req: CustomDoctorRequest, res: Response): Promise<any> => {
+    try {
+        const {appointmentId} = req.body;
+        const docId = req.docId;
+
+        const appointment = await Appointment.findById(appointmentId);
+        if(!appointment) return res.status(500).json({success:false, message: "Appointment does not exist"});  
+        if(appointment.docId !== docId) return res.status(401).json({success:false, message: "Unauthorized"});  
+
+        if(appointment.cancelled) return res.status(500).json({success:false, message: "Already Cancelled"});  
+
+        appointment.cancelled = true;
+        await appointment.save();
+
+        return res.status(200).json({success:true, message: "Appointment Cancelled Successfully"})
+    } catch (error) {
+        return res.status(500).json({success:false, message: "Error while cancelling appointment"}); 
+    }
+};
+
+const doctorDashboard = async (req: CustomDoctorRequest, res: Response) : Promise<any> =>{
+    try {
+        const docId = req.docId;
+
+        const appointments = await Appointment.find({docId});
+       
+        const earnings = appointments.reduce((acc, item) => item.isCompleted ? acc += item.amount : acc + 0,0);
+
+        const patients = appointments.reduce((acc, item) =>{
+            if(!acc.includes(item.userId)){
+                acc.push(item.userId);
+            };
+
+            return acc;
+        },[]);
+
+        const dashboardData = {
+            earnings, patients, appointments: appointments.length,
+            latestAppointments: appointments.reverse().slice(0,5)
+        };
+
+        return res.status(200).json({success:true, message: "Data fetched successfully", dashboardData})
+    } catch (error) {
+        console.log("error in doctor dashboard data controller", error);
+        return res.status(500).json({success:false, message: "Error while getting data"});
+    }
+}
+
+export {chageAvailability, doctorList, login, appointmentDoctor, appointmentCancel, appointmentComplete, doctorDashboard};

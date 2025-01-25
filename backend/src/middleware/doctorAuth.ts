@@ -8,6 +8,7 @@ export interface CustomDoctorRequest extends Request {
 const authDoctor = async (req: CustomDoctorRequest, res: Response, next: NextFunction): Promise<any> =>{
     try {
         const {token} = req.headers;
+        console.log(token)
         if(!token) return res.status(401).json({success:false, message: "No Token found"});
 
         const token_decode = jwt.verify(token as string, process.env.DOCTOR_SECRET!);
