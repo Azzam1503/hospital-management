@@ -144,9 +144,9 @@ const doctorProfile = async (req : CustomDoctorRequest, res: Response): Promise<
 const doctorProfileUpdate = async (req: CustomDoctorRequest, res: Response) : Promise<any> =>{
     try {
         const docId = req.docId;
-        const {fee, address, available, about} = req.body;
+        const {fee, address, available} = req.body;
 
-        await Doctor.findByIdAndUpdate({fee, address, available, about});
+        await Doctor.findByIdAndUpdate(docId, {fee, address, available});
         return res.status(200).json({success: true, message: "Updated Successfully"}); 
     } catch (error) {
         console.log("error in doctor profile update controller", error);

@@ -17,13 +17,13 @@ const About = () => {
         />
         <div className="flex flex-col justify-center gap-6 md:w-2/4 text-sm text-gray-600">
           <p>
-            Welcome, your trusted partner in managing your healthcare needs
-            conveniently and efficiently. At Prescripto, we understand the
-            challenges individuals face when it comes to scheduling doctor
-            appointments and managing their health records.
+            Welcome to CareSync, your trusted partner in managing your
+            healthcare needs conveniently and efficiently. At CareSync, we
+            understand the challenges individuals face when it comes to
+            scheduling doctor appointments and managing their health records.
           </p>
           <p>
-            We are committed to excellence in healthcare technology. We
+            Caresync committed to excellence in healthcare technology. We
             continuously strive to enhance our platform, integrating the latest
             advancements to improve user experience and deliver superior
             service. Whether you're booking your first appointment or managing

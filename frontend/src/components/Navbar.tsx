@@ -6,6 +6,7 @@ import { AppContext } from "../context/AppContext";
 const Navbar = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+
   const { userToken, setUserToken } = useContext(AppContext);
 
   return (
@@ -31,10 +32,10 @@ const Navbar = () => {
       </ul>
       <div className="flex item-center gap-4">
         {userToken ? (
-          <div className="flex item-center gap-2 cursor-pointer group relative">
+          <div className="flex item-center gap-2 cursor-pointer  relative group">
             <img className="w-8 rounded-full" src={assets.profile_pic} alt="" />
             <img className="w-2.5" src={assets.dropdown_icon} alt="" />
-            <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-29 hidden group-hover:block">
+            <div className="absolute top-full right-0  text-base font-medium text-gray-600 hidden group-hover:block">
               <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
                 <p
                   onClick={() => navigate("/my-profile")}
@@ -43,7 +44,7 @@ const Navbar = () => {
                   My Profile
                 </p>
                 <p
-                  onClick={() => navigate("my-appointments")}
+                  onClick={() => navigate("/my-appointments")}
                   className="hover:text-black cursor-pointer"
                 >
                   My appointments
