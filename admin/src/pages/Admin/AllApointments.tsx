@@ -1,10 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AdminContext } from "../../context/AdminContext";
 import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets_admin/assets";
-import axios from "axios";
 
 const AllApointments = () => {
   const { token, getAllAppointments, appointments, cancelAppointment } =

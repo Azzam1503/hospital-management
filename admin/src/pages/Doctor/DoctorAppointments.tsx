@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
